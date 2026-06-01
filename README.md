@@ -1,12 +1,16 @@
-# TerraTones-Pemweb
-
-Deskripsi Web:
+# TerraTones
+---
+##Deskripsi Web:
 Terra Tones is a website designed to bridge the gap between local musicians and their loyal listeners. This platform allows musicians to upload their work, promote gig schedules, and build an organic fan community all within a single digital ecosystem that supports local music.
 
-# Team
-Bintang Aqra Wibowo
-Henriko Almer Rayyan
-Lalu Moh. Habib Adrian Maulana
+---
+
+## Team
+*Bintang Aqra Wibowo
+*Henriko Almer Rayyan
+*Lalu Moh. Habib Adrian Maulana
+
+---
 
 ## Actors & Features
 
