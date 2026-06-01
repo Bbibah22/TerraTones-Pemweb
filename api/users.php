@@ -2,6 +2,7 @@
 // ============================================================
 // api/users.php — Manajemen Pengguna (Admin)
 // GET    /api/users.php        → semua users (dengan filter ?q=keyword)
+// DELETE /api/users.php?id=X  → hapus user (admin tidak bisa dihapus)
 // ============================================================
 require_once __DIR__ . '/../config/db.php';
 
@@ -37,6 +38,22 @@ switch ($method) {
         }, $users);
 
         jsonResponse($users);
+        break;
+
+    case 'DELETE':
+        $id = $_GET['id'] ?? '';
+        if (!$id) jsonResponse(['error' => 'id wajib diisi'], 400);
+
+        // Cek apakah user adalah admin — admin tidak boleh dihapus
+        $chk = $db->prepare('SELECT role FROM users WHERE id = ?');
+        $chk->execute([$id]);
+        $user = $chk->fetch();
+        if (!$user) jsonResponse(['error' => 'User tidak ditemukan'], 404);
+        if ($user['role'] === 'admin') jsonResponse(['error' => 'Admin tidak bisa dihapus'], 403);
+
+        $db->prepare('DELETE FROM likes WHERE user_id = ?')->execute([$id]);
+        $db->prepare('DELETE FROM users WHERE id = ?')->execute([$id]);
+        jsonResponse(['success' => true]);
         break;
 
     default:
