@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LokalBeat — Musik Lokal Indonesia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#ff5e3a', dark: '#e04a28', light: '#ff7a5c' },
+            surface: { DEFAULT: '#111118', card: '#16161f', hover: '#1e1e2a' },
+            border: { DEFAULT: '#222230' }
+          },
+          fontFamily: {
+            heading: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif']
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease forwards',
+            'pulse-slow': 'pulse 3s infinite',
+            'spin-slow': 'spin 8s linear infinite',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%': { opacity: 0, transform: 'translateY(30px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body { background: #0a0a0f; color: #f0f0f5; font-family: 'DM Sans', sans-serif; }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Syne', sans-serif; }
+    .grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); }
+    .glow-brand { box-shadow: 0 0 40px rgba(255,94,58,0.25); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .wave { animation: wave 2s linear infinite; }
+    @keyframes wave {
+      0%,100% { height: 8px; } 25% { height: 20px; } 75% { height: 14px; }
+    }
+    .hero-bg {
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255,94,58,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 80% 60%, rgba(255,179,71,0.08) 0%, transparent 60%),
+                  #0a0a0f;
+    }
+    .badge-musisi { background: linear-gradient(135deg,#a78bfa,#60a5fa); }
+    .badge-admin { background: linear-gradient(135deg,#ff5e3a,#ffb347); }
+    .badge-user { background: linear-gradient(135deg,#4ade80,#22d3ee); }
+    .scroll-reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+    .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+    .progress-bar { transition: width 1.5s ease; }
+    .play-btn { transition: all 0.2s; }
+    .play-btn:hover { transform: scale(1.1); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #111118; }
+    ::-webkit-scrollbar-thumb { background: #ff5e3a55; border-radius: 3px; }
+  </style>
+</head>
+<body class="hero-bg min-h-screen">
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5 backdrop-blur-xl bg-black/40">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-brand flex items-center justify-center glow-brand">
+          <i class="fa-solid fa-music text-white text-sm"></i>
+        </div>
+        <span class="font-heading font-800 text-xl text-white">Lokal<span class="text-brand">Beat</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+        <a href="#explore" class="hover:text-white transition">Jelajahi</a>
+        <a href="#musisi" class="hover:text-white transition">Musisi</a>
+        <a href="#genre" class="hover:text-white transition">Genre</a>
+        <a href="#tentang" class="hover:text-white transition">Tentang</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="pages/login.html" class="text-sm text-gray-300 hover:text-white transition px-4 py-2">Masuk</a>
+        <a href="pages/register.html" class="bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition glow-brand">Daftar</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="pt-32 pb-20 px-6 text-center relative overflow-hidden">
+    <div class="absolute inset-0 grain pointer-events-none"></div>
+    <!-- floating circles -->
+    <div class="absolute top-24 left-10 w-72 h-72 rounded-full bg-brand/5 blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-0 right-10 w-96 h-96 rounded-full bg-yellow-500/5 blur-3xl animate-pulse-slow"></div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-gray-400 mb-6">
+        <span class="w-2 h-2 rounded-full bg-brand animate-pulse-slow"></span>
+        Platform Musik Lokal Indonesia #1
+      </div>
+      <h1 class="font-heading text-5xl md:text-7xl font-extrabold text-white leading-tight mb-6">
+        Temukan Musik<br/>
+        <span class="text-brand">Lokal</span> Terbaik
+      </h1>
+      <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+        Platform untuk menemukan, mendengarkan, dan mendukung musisi lokal Indonesia. Dari indie folk, jazz, hingga dangdut modern.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#explore" class="bg-brand hover:bg-brand-dark text-white font-semibold px-8 py-4 rounded-2xl transition glow-brand flex items-center gap-2 text-sm">
+          <i class="fa-solid fa-play"></i> Mulai Mendengarkan
+        </a>
+        <a href="pages/register.html?role=musisi" class="border border-white/10 hover:border-brand/50 text-white font-semibold px-8 py-4 rounded-2xl transition text-sm flex items-center gap-2">
+          <i class="fa-solid fa-guitar"></i> Daftar Sebagai Musisi
+        </a>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="max-w-3xl mx-auto mt-20 grid grid-cols-3 gap-6">
+      <div class="bg-white/5 border border-white/5 rounded-2xl p-6 scroll-reveal">
+        <div class="text-3xl font-heading font-bold text-white mb-1">1.2K+</div>
+        <div class="text-xs text-gray-500">Musisi Terdaftar</div>
+      </div>
+      <div class="bg-white/5 border border-white/5 rounded-2xl p-6 scroll-reveal">
+        <div class="text-3xl font-heading font-bold text-brand mb-1">8.5K+</div>
+        <div class="text-xs text-gray-500">Lagu Tersedia</div>
+      </div>
+      <div class="bg-white/5 border border-white/5 rounded-2xl p-6 scroll-reveal">
+        <div class="text-3xl font-heading font-bold text-white mb-1">45K+</div>
+        <div class="text-xs text-gray-500">Pendengar Aktif</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOW PLAYING CARD -->
+  <section class="px-6 pb-16">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-surface-card border border-border rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 glow-brand">
+        <div class="relative flex-shrink-0">
+          <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-brand to-yellow-400 flex items-center justify-center text-5xl shadow-2xl">
+            🎵
+          </div>
+          <div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-brand flex items-center justify-center">
+            <i class="fa-solid fa-play text-white text-xs"></i>
+          </div>
+        </div>
+        <div class="flex-1 text-center md:text-left">
+          <div class="text-xs text-brand font-semibold mb-1 uppercase tracking-wider">Sedang Trending</div>
+          <h3 class="font-heading text-2xl font-bold text-white mb-1">Rindu Tanah Air</h3>
+          <p class="text-gray-400 text-sm mb-4">Arjuna Band · Album: Nusantara Dreams</p>
+          <!-- progress -->
+          <div class="w-full bg-white/10 rounded-full h-1.5 mb-2">
+            <div class="bg-brand h-1.5 rounded-full progress-bar" style="width: 45%" id="progressBar"></div>
+          </div>
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>1:53</span><span>4:12</span>
+          </div>
+        </div>
+        <!-- wave animation -->
+        <div class="flex items-end gap-1 h-12">
+          <div class="w-1 bg-brand rounded wave" style="animation-delay:0s"></div>
+          <div class="w-1 bg-brand rounded wave" style="animation-delay:0.2s"></div>
+          <div class="w-1 bg-brand/70 rounded wave" style="animation-delay:0.4s"></div>
+          <div class="w-1 bg-brand rounded wave" style="animation-delay:0.1s"></div>
+          <div class="w-1 bg-brand/50 rounded wave" style="animation-delay:0.3s"></div>
+          <div class="w-1 bg-brand rounded wave" style="animation-delay:0.5s"></div>
+          <div class="w-1 bg-brand/80 rounded wave" style="animation-delay:0.15s"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLORE / LAGU TERBARU -->
+  <section id="explore" class="px-6 pb-20">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="font-heading text-3xl font-bold text-white">Lagu Terbaru</h2>
+          <p class="text-gray-500 text-sm mt-1">Karya segar dari musisi lokal</p>
+        </div>
+        <a href="pages/user-dashboard.html" class="text-brand text-sm hover:underline flex items-center gap-1">Lihat Semua <i class="fa-solid fa-arrow-right text-xs"></i></a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="songGrid">
+        <!-- cards injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- MUSISI FEATURED -->
+  <section id="musisi" class="px-6 pb-20">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="font-heading text-3xl font-bold text-white">Musisi Pilihan</h2>
+          <p class="text-gray-500 text-sm mt-1">Talenta terbaik dari seluruh Indonesia</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5" id="musisiGrid">
+      </div>
+    </div>
+  </section>
+
+  <!-- GENRE -->
+  <section id="genre" class="px-6 pb-20">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="font-heading text-3xl font-bold text-white mb-8">Jelajahi Genre</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="genreGrid">
+      </div>
+    </div>
+  </section>
+
+  <!-- DAFTAR ROLES -->
+  <section id="tentang" class="px-6 pb-24">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="font-heading text-3xl font-bold text-white mb-3">Bergabung Sekarang</h2>
+        <p class="text-gray-400">Pilih peranmu di LokalBeat</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-surface-card border border-border rounded-3xl p-8 card-hover text-center">
+          <div class="w-16 h-16 rounded-2xl badge-user flex items-center justify-center mx-auto mb-5 text-2xl">🎧</div>
+          <h3 class="font-heading text-xl font-bold text-white mb-3">Pendengar</h3>
+          <p class="text-gray-400 text-sm leading-relaxed mb-6">Temukan dan nikmati ribuan lagu lokal. Buat playlist, ikuti musisi favorit, dan berikan dukunganmu.</p>
+          <a href="pages/register.html?role=user" class="block bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-semibold py-3 rounded-xl transition">Daftar Gratis</a>
+        </div>
+        <div class="bg-surface-card border border-brand/30 rounded-3xl p-8 card-hover text-center relative overflow-hidden">
+          <div class="absolute top-4 right-4 bg-brand text-white text-xs px-3 py-1 rounded-full font-semibold">Popular</div>
+          <div class="w-16 h-16 rounded-2xl badge-musisi flex items-center justify-center mx-auto mb-5 text-2xl">🎸</div>
+          <h3 class="font-heading text-xl font-bold text-white mb-3">Musisi</h3>
+          <p class="text-gray-400 text-sm leading-relaxed mb-6">Upload karya musikmu, bangun fanbase, dan raih royalti dari setiap stream lagu kamu.</p>
+          <a href="pages/register.html?role=musisi" class="block bg-brand hover:bg-brand-dark text-white text-sm font-semibold py-3 rounded-xl transition glow-brand">Mulai Berkarya</a>
+        </div>
+        <div class="bg-surface-card border border-border rounded-3xl p-8 card-hover text-center">
+          <div class="w-16 h-16 rounded-2xl badge-admin flex items-center justify-center mx-auto mb-5 text-2xl">🛡️</div>
+          <h3 class="font-heading text-xl font-bold text-white mb-3">Admin</h3>
+          <p class="text-gray-400 text-sm leading-relaxed mb-6">Kelola platform, verifikasi musisi, moderasi konten, dan pantau statistik pertumbuhan.</p>
+          <a href="pages/login.html?role=admin" class="block bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-semibold py-3 rounded-xl transition">Login Admin</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-border px-6 py-10">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-brand flex items-center justify-center"><i class="fa-solid fa-music text-white text-xs"></i></div>
+        <span class="font-heading font-bold text-white">Lokal<span class="text-brand">Beat</span></span>
+      </div>
+      <p class="text-gray-500 text-sm">© 2025 LokalBeat. Bangga dengan Musik Indonesia.</p>
+      <div class="flex gap-4 text-gray-500 text-sm">
+        <a href="#" class="hover:text-white transition">Privasi</a>
+        <a href="#" class="hover:text-white transition">Syarat</a>
+        <a href="#" class="hover:text-white transition">Kontak</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
