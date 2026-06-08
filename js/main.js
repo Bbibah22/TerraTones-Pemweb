@@ -1,7 +1,3 @@
-// ============================================================
-// js/main.js — Landing Page LokalBeat (versi PHP/API)
-// ============================================================
-
 document.addEventListener('DOMContentLoaded', async () => {
   await renderSongs();
   await renderMusisi();
