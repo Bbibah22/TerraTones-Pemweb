@@ -1,7 +1,3 @@
-// ============================================================
-// js/kota-indonesia.js — Data kota & provinsi Indonesia
-// ============================================================
-
 const PROVINSI_INDONESIA = [
   'Aceh','Sumatera Utara','Sumatera Barat','Riau','Kepulauan Riau',
   'Jambi','Bengkulu','Sumatera Selatan','Kepulauan Bangka Belitung','Lampung',
@@ -52,7 +48,6 @@ const KOTA_PER_PROVINSI = {
   'Papua Pegunungan': ['Wamena'],
 };
 
-// Render dropdown provinsi
 function renderProvinsiSelect(selectId, selectedVal = '') {
   const el = document.getElementById(selectId);
   if (!el) return;
@@ -62,7 +57,6 @@ function renderProvinsiSelect(selectId, selectedVal = '') {
     ).join('');
 }
 
-// Render dropdown kota berdasarkan provinsi yang dipilih
 function renderKotaSelect(selectId, provinsi, selectedVal = '') {
   const el = document.getElementById(selectId);
   if (!el) return;
@@ -72,8 +66,6 @@ function renderKotaSelect(selectId, provinsi, selectedVal = '') {
       `<option value="${k}" ${k === selectedVal ? 'selected' : ''}>${k}</option>`
     ).join('');
 }
-
-// Expose global
 window.PROVINSI_INDONESIA  = PROVINSI_INDONESIA;
 window.KOTA_PER_PROVINSI   = KOTA_PER_PROVINSI;
 window.renderProvinsiSelect = renderProvinsiSelect;
