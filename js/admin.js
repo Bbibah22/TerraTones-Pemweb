@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // ── Auth guard ────────────────────────────────────────────
   let cu;
   try {
     cu = await API.auth.me();
@@ -10,7 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   document.getElementById('sidebarName').textContent = cu.name;
 
-  // ── Tab switching ─────────────────────────────────────────
   window.showTab = function (name, el) {
     document.querySelectorAll('main > div[id^="tab-"]').forEach(d => d.classList.add('hidden'));
     document.getElementById('tab-' + name).classList.remove('hidden');
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (name === 'review') renderReview();
   };
 
-  // ── OVERVIEW ──────────────────────────────────────────────
   async function loadOverview() {
     const [users, musisi, songs] = await Promise.all([
       API.users.all(),
@@ -58,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   }
 
-  // ── USERS TABLE ───────────────────────────────────────────
   window.renderUsersTable = async function () {
     const q     = document.getElementById('searchUser')?.value || '';
     const users = await API.users.all(q);
@@ -78,7 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   };
 
-  // ── MUSISI TABLE ──────────────────────────────────────────
   window.renderMusisiTable = async function () {
     const list = await API.musisi.all();
     document.getElementById('musisiTable').innerHTML = list.map(m => `
@@ -97,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   };
 
-  // ── MUSISI SONGS MODAL ────────────────────────────────────
   window.openMusisiSongs = async function (musisiId, musisiName, genre, kota) {
     document.getElementById('modalMusisiName').textContent = musisiName;
     document.getElementById('modalMusisiMeta').textContent = genre + ' · ' + kota;
@@ -157,8 +151,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMusisiTable();
   };
 
-
-  // ── GIGS ADMIN TABLE ──────────────────────────────────────
   window.openAdminAddGig = function () {
     const form = document.getElementById('addGigForm');
     form.classList.toggle('hidden');
@@ -281,7 +273,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderGigsAdmin();
   };
 
-  // ── REVIEW LIST ───────────────────────────────────────────
   window.renderReview = async function () {
     const songs = (await API.songs.all()).filter(s => s.status === 'review');
     const el    = document.getElementById('reviewList');
@@ -314,7 +305,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   };
 
-  // ── ACTIONS ───────────────────────────────────────────────
   window.verifyMusisi = async function (id) {
     await API.musisi.update(id, { verified: true });
     renderMusisiTable();
