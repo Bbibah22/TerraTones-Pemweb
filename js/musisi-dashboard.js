@@ -1,9 +1,4 @@
-// ============================================================
-// js/musisi-dashboard.js — Dashboard Musisi
-// ============================================================
-
 document.addEventListener('DOMContentLoaded', async () => {
-  // ── Auth guard ────────────────────────────────────────────
   let cu, musisiData;
   try {
     cu = await API.auth.me();
@@ -20,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       '<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span><span class="text-green-400">Verified ✓</span>';
   }
 
-  // ── Tab switching ─────────────────────────────────────────
   window.showTab = function (name, el) {
     document.querySelectorAll('main > div[id^="tab-"]').forEach(d => d.classList.add('hidden'));
     document.getElementById('tab-' + name).classList.remove('hidden');
@@ -35,7 +29,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (name === 'upload')   buildEmojiPicker();
   };
 
-  // ── OVERVIEW ──────────────────────────────────────────────
   async function loadOverview() {
     const songs = await API.songs.byMusisi(cu.musisi_id);
     document.getElementById('mySongCount').textContent  = songs.length;
@@ -61,8 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('') || '<p class="text-gray-500 text-sm">Belum ada lagu. Yuk upload karya pertamamu!</p>';
   }
 
-
-  // ── EMOJI PICKER ──────────────────────────────────────────
   const emojis = ['🎵','🎸','🎹','🎤','🎷','🥁','🪕','🎺','🎻','🌿','☀️','🌧️','🌊','⭐','🌋','🏡','🏮','🎭','🌙','🔥'];
   let selectedEmoji = '🎵';
 
@@ -82,7 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.classList.add('ring-2', 'ring-brand');
   };
 
-  // ── FILE SELECTED ─────────────────────────────────────────
   window.fileSelected = function (input) {
     const file = input.files[0];
     if (!file) return;
@@ -92,7 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileSize').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
 
-    // Auto-detect durasi dari metadata MP3 menggunakan AudioContext
     const url = URL.createObjectURL(file);
     const tmpAudio = new Audio(url);
     tmpAudio.addEventListener('loadedmetadata', () => {
@@ -115,8 +104,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('durasiAuto').classList.add('hidden');
   };
 
-
-  // ── UPLOAD SONG ───────────────────────────────────────────
   window.uploadSong = async function () {
     const title    = document.getElementById('up-title').value.trim();
     const genre    = document.getElementById('up-genre').value;
@@ -128,7 +115,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('Lengkapi judul dan genre!', 'error'); return;
     }
 
-    // Tentukan sumber audio
     let fileUrl = '';
     const fileInput = document.getElementById('fileInput');
     const hasFile   = fileInput.files.length > 0;
@@ -142,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Memproses...';
 
     try {
-      // 1. Buat record lagu dulu (dapat song_id)
+
       const newSong = await API.songs.add({
         title, genre,
         duration: duration || '0:00',
@@ -152,12 +138,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         fileUrl:    '',
       });
 
-      // 2. Upload file MP3 ke server jika mode file
       if (hasFile) {
         const file = fileInput.files[0];
         document.getElementById('uploadProgress').classList.remove('hidden');
 
-        // Simulasi progress bar saat upload (fetch tidak expose progress)
         let pct = 0;
         const progInterval = setInterval(() => {
           pct = Math.min(pct + 5, 90);
@@ -171,9 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('progressBar').style.width = '100%';
         document.getElementById('progressPct').textContent = '100%';
 
-        // Update durasi dari file nyata jika belum ada
         if (!duration && uploadResult.url) {
-          // durasi sudah diisi otomatis saat fileSelected
         }
 
         fileUrl = uploadResult.url;
@@ -181,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       showToast('Lagu berhasil disubmit! Menunggu review admin.');
 
-      // Reset form
       document.getElementById('up-title').value    = '';
       document.getElementById('up-genre').value    = '';
       document.getElementById('up-duration').value = '';
@@ -201,7 +182,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // ── MY SONGS ──────────────────────────────────────────────
   window.renderMySongs = async function () {
     const songs = await API.songs.byMusisi(cu.musisi_id);
     const el    = document.getElementById('mySongList');
@@ -237,8 +217,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadOverview();
     showToast('Lagu dihapus');
   };
-
-  // ── PROFILE ───────────────────────────────────────────────
   window.loadProfile = function () {
     if (!musisiData) return;
     document.getElementById('profileName').textContent  = musisiData.name;
@@ -272,7 +250,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     location.href = 'login.html';
   };
 
-  // Init
   loadOverview();
   buildEmojiPicker();
 });
