@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Musisi — LokalBeat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{DEFAULT:'#ff5e3a',dark:'#e04a28'}}}}}</script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body{background:#0a0a0f;color:#f0f0f5;font-family:'DM Sans',sans-serif;}
+    h1,h2,h3,h4{font-family:'Syne',sans-serif;}
+    .sidebar{background:#0e0e16;border-right:1px solid #1a1a28;}
+    .nav-item{transition:all 0.2s;border-radius:12px;}
+    .nav-item:hover,.nav-item.active{background:#ff5e3a;color:white;}
+    .card{background:#16161f;border:1px solid #222230;border-radius:20px;}
+    .badge-published{background:#22c55e20;color:#4ade80;border-radius:8px;font-size:11px;font-weight:600;padding:3px 10px;}
+    .badge-review{background:#f59e0b20;color:#fbbf24;border-radius:8px;font-size:11px;font-weight:600;padding:3px 10px;}
+    input:focus,select:focus,textarea:focus{outline:none;}
+    .toast{position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;transform:translateX(120%);transition:transform 0.3s ease;}
+    .toast.show{transform:translateX(0);}
+    .toast.success{background:#22c55e;color:white;}
+    .toast.error{background:#ef4444;color:white;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:#111118;}
+    ::-webkit-scrollbar-thumb{background:#ff5e3a44;border-radius:2px;}
+  </style>
+</head>
+<body class="min-h-screen flex">
+
+  <div id="toast" class="toast"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-64 min-h-screen fixed left-0 top-0 flex flex-col z-40">
+    <div class="p-6 border-b border-[#1a1a28]">
+      <a href="../index.html" class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-brand flex items-center justify-center">
+          <i class="fa-solid fa-music text-white text-sm"></i>
+        </div>
+        <span style="font-family:Syne" class="font-bold text-white">Lokal<span class="text-brand">Beat</span></span>
+      </a>
+      <div class="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-xl">🎸</div>
+        <div>
+          <div class="text-sm font-semibold text-white" id="sidebarName">Musisi</div>
+          <div class="flex items-center gap-1 text-xs" id="verifyStatus">
+            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+            <span class="text-yellow-400">Menunggu verifikasi</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm font-semibold" onclick="showTab('overview',this)">
+        <i class="fa-solid fa-chart-line w-4"></i> Overview
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('upload',this)">
+        <i class="fa-solid fa-cloud-arrow-up w-4"></i> Upload Lagu
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('my-songs',this)">
+        <i class="fa-solid fa-list-music w-4"></i> Lagu Saya
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('profil',this)">
+        <i class="fa-solid fa-user w-4"></i> Profil Musisi
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-[#1a1a28]">
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-400 hover:text-white rounded-xl hover:bg-white/5 transition">
+        <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ml-64 flex-1 p-8">
+
+    <!-- OVERVIEW TAB -->
+    <div id="tab-overview">
+      <h1 class="text-2xl font-bold text-white mb-1">Dashboard Musisi</h1>
+      <p class="text-gray-400 text-sm mb-8">Pantau performa karya musikmu</p>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="card p-6">
+          <span class="text-xs text-gray-500">Total Lagu</span>
+          <div class="text-3xl font-bold text-white mt-2" id="mySongCount">0</div>
+          <div class="text-xs text-gray-500 mt-1">karya diunggah</div>
+        </div>
+        <div class="card p-6">
+          <span class="text-xs text-gray-500">Total Stream</span>
+          <div class="text-3xl font-bold text-brand mt-2" id="myStreams">0</div>
+          <div class="text-xs text-gray-500 mt-1">semua lagu</div>
+        </div>
+        <div class="card p-6">
+          <span class="text-xs text-gray-500">Total Likes</span>
+          <div class="text-3xl font-bold text-white mt-2" id="myLikes">0</div>
+          <div class="text-xs text-gray-500 mt-1">apresiasi pendengar</div>
+        </div>
+        <div class="card p-6">
+          <span class="text-xs text-gray-500">Followers</span>
+          <div class="text-3xl font-bold text-white mt-2" id="myFollowers">0</div>
+          <div class="text-xs text-gray-500 mt-1">penggemar setia</div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="font-bold text-white mb-4">Lagu Terpopuler</h3>
+        <div id="topSongs" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- UPLOAD TAB -->
+    <div id="tab-upload" class="hidden">
+      <h1 class="text-2xl font-bold text-white mb-1">Upload Lagu Baru</h1>
+      <p class="text-gray-400 text-sm mb-8">Bagikan karya terbaikmu ke pendengar</p>
+
+      <div class="card p-8 max-w-2xl">
+        <div class="space-y-5">
+          <div>
+            <label class="text-xs text-gray-400 mb-2 block">Judul Lagu *</label>
+            <input id="up-title" type="text" placeholder="Nama lagumu..."
+              class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 transition"/>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-gray-400 mb-2 block">Genre *</label>
+              <select id="up-genre" class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white transition">
+                <option value="">Pilih genre...</option>
+                <option>Indie Folk</option><option>Jazz Lokal</option><option>Pop Alternatif</option>
+                <option>R&B Lokal</option><option>Dangdut Modern</option><option>Keroncong</option>
+                <option>Hip-Hop Lokal</option><option>Elektronik</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-2 block">Durasi <span id="durasiAuto" class="text-brand hidden">— terdeteksi otomatis</span></label>
+              <input id="up-duration" type="text" placeholder="3:45"
+                class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 transition"/>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-2 block">Cover Emoji</label>
+            <div class="flex gap-2 flex-wrap" id="emojiPicker">
+              <!-- emojis injected by JS -->
+            </div>
+            <input id="up-cover" type="hidden" value="🎵"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-2 block">Deskripsi Lagu</label>
+            <textarea id="up-desc" rows="3" placeholder="Ceritakan inspirasi di balik lagu ini..."
+              class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 transition resize-none"></textarea>
+          </div>
+
+          <!-- File Audio -->
+          <div>
+            <label class="text-xs text-gray-400 mb-3 block">File Audio *</label>
+            <div class="border-2 border-dashed border-[#222230] rounded-2xl p-8 text-center hover:border-brand/50 transition cursor-pointer" onclick="document.getElementById('fileInput').click()">
+              <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand mb-3 block"></i>
+              <p class="text-sm text-gray-400">Klik untuk pilih file MP3 / WAV</p>
+              <p class="text-xs text-gray-600 mt-1">Format: MP3, WAV · Maks 50MB</p>
+              <input id="fileInput" type="file" accept=".mp3,.wav,audio/mpeg,audio/wav" class="hidden" onchange="fileSelected(this)"/>
+            </div>
+            <div id="fileInfo" class="hidden mt-3 flex items-center gap-3 p-3 bg-brand/10 rounded-xl border border-brand/20">
+              <i class="fa-solid fa-file-audio text-brand text-lg"></i>
+              <div class="flex-1 min-w-0">
+                <div id="fileName" class="text-sm text-white truncate"></div>
+                <div id="fileSize" class="text-xs text-gray-400 mt-0.5"></div>
+              </div>
+              <button onclick="clearFile()" class="text-gray-500 hover:text-red-400 transition text-xs"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div id="uploadProgress" class="hidden mt-3">
+              <div class="flex justify-between text-xs text-gray-400 mb-1">
+                <span>Mengupload...</span><span id="progressPct">0%</span>
+              </div>
+              <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-brand rounded-full transition-all" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="uploadSong()" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-4 rounded-xl transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Submit untuk Review
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- MY SONGS TAB -->
+    <div id="tab-my-songs" class="hidden">
+      <h1 class="text-2xl font-bold text-white mb-1">Lagu Saya</h1>
+      <p class="text-gray-400 text-sm mb-8">Kelola semua karya yang telah kamu upload</p>
+      <div class="space-y-4" id="mySongList"></div>
+    </div>
+
+    <!-- PROFIL TAB -->
+    <div id="tab-profil" class="hidden">
+      <h1 class="text-2xl font-bold text-white mb-1">Profil Musisi</h1>
+      <p class="text-gray-400 text-sm mb-8">Perbarui informasi profil publikmu</p>
+
+      <div class="card p-8 max-w-2xl">
+        <div class="flex items-center gap-6 mb-8">
+          <div class="w-20 h-20 rounded-2xl bg-purple-500/20 flex items-center justify-center text-5xl" id="profileCover">🎸</div>
+          <div>
+            <h3 class="font-bold text-white text-xl" id="profileName">—</h3>
+            <p class="text-gray-400 text-sm" id="profileGenre">—</p>
+            <p class="text-gray-500 text-xs mt-1" id="profileKota">—</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs text-gray-400 mb-2 block">Nama Panggung / Band</label>
+            <input id="edit-name" type="text" class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-2 block">Bio</label>
+            <textarea id="edit-bio" rows="4" class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white transition resize-none placeholder-gray-600" placeholder="Ceritakan tentang perjalanan musikmu..."></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-gray-400 mb-2 block">Genre</label>
+              <select id="edit-genre" class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white transition">
+                <option>Indie Folk</option><option>Jazz Lokal</option><option>Pop Alternatif</option>
+                <option>R&B Lokal</option><option>Dangdut Modern</option><option>Keroncong</option>
+                <option>Hip-Hop Lokal</option><option>Elektronik</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-2 block">Kota</label>
+              <input id="edit-kota" type="text" class="w-full bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-3 text-sm text-white transition"/>
+            </div>
+          </div>
+          <button onclick="saveProfile()" class="bg-brand hover:bg-brand-dark text-white font-semibold px-8 py-3 rounded-xl transition">
+            Simpan Perubahan
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/musisi-dashboard.js"></script>
+</body>
+</html>

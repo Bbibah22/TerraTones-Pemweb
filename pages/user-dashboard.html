@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jelajahi Musik — LokalBeat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{DEFAULT:'#ff5e3a',dark:'#e04a28'}}}}}</script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body{background:#0a0a0f;color:#f0f0f5;font-family:'DM Sans',sans-serif;}
+    h1,h2,h3,h4{font-family:'Syne',sans-serif;}
+    .sidebar{background:#0e0e16;border-right:1px solid #1a1a28;}
+    .nav-item{transition:all 0.2s;border-radius:12px;}
+    .nav-item:hover,.nav-item.active{background:var(--brand,#7B5CFA);color:white;}
+
+    .card{background:#16161f;border:1px solid #222230;border-radius:20px;}
+    input:focus{outline:none;}
+    .song-card{transition:all 0.2s;cursor:pointer;}
+    .song-card:hover{background:#1e1e2a;transform:translateY(-2px);}
+    .wave{animation:wave 2s linear infinite;}
+    @keyframes wave{0%,100%{height:6px;}25%{height:16px;}75%{height:10px;}}
+    .liked{color:#ff5e3a !important;}
+    .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);z-index:9999;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:500;background:#22c55e;color:white;transition:transform 0.3s ease;white-space:nowrap;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    /* Player */
+    .player{position:fixed;bottom:0;left:0;right:0;background:#0e0e16;border-top:1px solid #1a1a28;z-index:200;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:#111118;}
+    ::-webkit-scrollbar-thumb{background:#ff5e3a44;border-radius:2px;}
+    .genre-filter.active{background:var(--brand,#7B5CFA);color:white;}
+    .scrollbar-none{scrollbar-width:none;-ms-overflow-style:none;}
+    .scrollbar-none::-webkit-scrollbar{display:none;}
+    /* Follow button states */
+    .btn-follow{transition:all .2s;}
+    .btn-follow.following{background:rgba(123,92,250,.15);color:#7B5CFA;border-color:#7B5CFA;}
+    .btn-follow.following:hover{background:rgba(220,60,60,.15);color:#E24B4A;border-color:#E24B4A;}
+    .btn-follow.following:hover .follow-label::before{content:'Batal Ikuti';}
+    .btn-follow.following .follow-label{display:none;}
+    .btn-follow.following:hover .follow-label{display:block;}
+    /* Feed card */
+    .feed-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card-bg,#13131F);border:0.5px solid #1E1E30;border-radius:16px;transition:background .15s;cursor:pointer;}
+    .feed-card:hover{background:#1a1a2e;}
+
+    /* ── Share Modal ──────────────────────────────────────── */
+    #shareModal{position:fixed;inset:0;z-index:60;background:rgba(5,5,15,.8);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+    #shareModal.open{opacity:1;pointer-events:all;}
+    #shareSheet{background:#13131F;border:0.5px solid #1E1E30;border-radius:24px;width:100%;max-width:400px;margin:16px;transform:scale(.96) translateY(8px);transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .25s;opacity:0;}
+    #shareModal.open #shareSheet{transform:scale(1) translateY(0);opacity:1;}
+    .share-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;border-radius:16px;transition:background .15s;cursor:pointer;border:none;background:none;width:100%;}
+    .share-btn:hover{background:rgba(255,255,255,.06);}
+    .share-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+    .share-label{font-size:11px;color:#777;font-family:Inter,sans-serif;white-space:nowrap;}
+    .share-song-btn{opacity:0;transition:opacity .15s;}
+    .song-card:hover .share-song-btn{opacity:1;}
+    /* Gig cards */
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .gig-chip.active,.gig-chip:focus{border-color:var(--brand,#7B5CFA);color:var(--brand,#7B5CFA);background:rgba(123,92,250,.1);}
+  </style>
+</head>
+<body class="min-h-screen flex pb-24">
+
+  <div id="toast" class="toast"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-64 min-h-screen fixed left-0 top-0 flex flex-col z-40">
+    <div class="p-6 border-b border-[#1a1a28]">
+      <a href="../index.html" class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-brand flex items-center justify-center">
+          <i class="fa-solid fa-music text-white text-sm"></i>
+        </div>
+        <span style="font-family:Syne" class="font-bold text-white">Lokal<span class="text-brand">Beat</span></span>
+      </a>
+      <div class="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+        <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-xl" id="sidebarAvatar">🎧</div>
+        <div>
+          <div class="text-sm font-semibold text-white" id="sidebarName">Pendengar</div>
+          <div class="text-xs text-gray-500">Anggota LokalBeat</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm font-semibold" onclick="showTab('discover',this)">
+        <i class="fa-solid fa-compass w-4"></i> Jelajahi
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('feed',this)">
+        <i class="fa-solid fa-rss w-4"></i> Feed
+        <span id="feedBadge" class="hidden ml-auto bg-brand text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"></span>
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('liked',this)">
+        <i class="fa-solid fa-heart w-4"></i> Disukai
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('musisi',this)">
+        <i class="fa-solid fa-guitar w-4"></i> Musisi
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('profil',this)">
+        <i class="fa-solid fa-user w-4"></i> Profil
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-[#1a1a28]">
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-400 hover:text-white rounded-xl hover:bg-white/5 transition">
+        <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ml-64 flex-1 p-8">
+
+    <!-- DISCOVER TAB -->
+    <!-- DISCOVER TAB (Lagu + Gigs) -->
+    <div id="tab-discover">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h1 class="text-2xl font-bold text-white" id="greetingText">Halo 👋</h1>
+          <p class="text-gray-400 text-sm mt-0.5">Musik lokal &amp; acara terbaik hari ini</p>
+        </div>
+      </div>
+
+      <!-- ── UNIFIED SEARCH BAR ──────────────────────────── -->
+      <div class="relative mb-8">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+        <input id="discoverSearch" type="text"
+          placeholder="Cari lagu, musisi, gig, atau venue..."
+          class="w-full bg-[#0e0e1a] border border-[#222230] focus:border-brand rounded-2xl pl-11 pr-10 py-3.5 text-sm text-white placeholder-gray-600 outline-none transition"
+          oninput="onDiscoverSearch(this.value)"/>
+        <button id="discoverSearchClear"
+          class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition"
+          onclick="clearDiscoverSearch()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- ── PANEL GIGS ──────────────────────────────────── -->
+      <div id="panelGigs" class="mb-10">
+        <!-- Section heading -->
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-8 h-8 rounded-xl bg-brand/20 flex items-center justify-center">
+            <i class="fa-solid fa-ticket text-brand text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Gigs Mendatang</h2>
+            <p class="text-xs text-gray-500">Acara musik lokal di sekitarmu</p>
+          </div>
+        </div>
+        <!-- Filter bar: hanya kota -->
+        <div class="flex gap-3 mb-5">
+          <select id="gigKotaFilter" onchange="applyGigFilters()"
+            class="bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-3 py-2.5 text-sm text-white outline-none transition">
+            <option value="">Semua kota</option>
+          </select>
+          <!-- hidden filters kept for JS compatibility -->
+          <input id="gigSearchInput" type="text" class="hidden"/>
+          <select id="gigGenreFilter" class="hidden"></select>
+          <input id="gigDateFrom" type="date" class="hidden"/>
+          <input id="gigDateTo"   type="date" class="hidden"/>
+        </div>
+
+        <!-- Stats + view toggle -->
+        <div class="text-xs text-gray-500 mb-4 flex items-center justify-between">
+          <span id="gigCount">Memuat gigs...</span>
+          <div class="flex gap-2">
+            <button onclick="setGigView('grid')" id="gigViewGrid" class="p-1.5 rounded-lg bg-white/10 text-white"><i class="fa-solid fa-grip"></i></button>
+            <button onclick="setGigView('list')" id="gigViewList" class="p-1.5 rounded-lg text-gray-500 hover:text-white transition"><i class="fa-solid fa-list"></i></button>
+          </div>
+        </div>
+
+        <!-- Gig grid / list -->
+        <div id="gigsContainer"></div>
+      </div>
+
+      <!-- Divider -->
+      <div class="border-t border-[#1a1a28] my-8"></div>
+
+      <!-- ── PANEL LAGU ──────────────────────────────────── -->
+      <div id="panelLagu">
+        <!-- Section heading -->
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-8 h-8 rounded-xl bg-brand/20 flex items-center justify-center">
+            <i class="fa-solid fa-music text-brand text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Temukan Lagu</h2>
+            <p class="text-xs text-gray-500">Musik lokal terbaik hari ini</p>
+          </div>
+        </div>
+        <!-- Genre filter -->
+        <div class="flex gap-2 flex-wrap mb-6" id="genreFilters">
+          <button class="genre-filter active text-xs px-4 py-2 rounded-full border border-[#222230] bg-brand text-white transition" onclick="filterByGenre('',this)">Semua</button>
+        </div>
+        <!-- Song Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" id="discoverGrid"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: Gig Detail (admin-only, no submit for users) -->
+    <div id="submitGigModal" class="hidden modal-bg" onclick="closeSubmitGig(event)">
+      <div class="modal max-w-lg w-full" style="max-height:90vh;overflow-y:auto;" onclick="event.stopPropagation()"></div>
+    </div>
+
+
+      <div class="flex gap-2 flex-wrap mb-6" id="genreFilters">
+        <button class="genre-filter active text-xs px-4 py-2 rounded-full border border-[#222230] bg-brand text-white transition" onclick="filterByGenre('',this)">Semua</button>
+      </div>
+
+      <!-- Song Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" id="discoverGrid"></div>
+    </div>
+
+    <!-- LIKED TAB -->
+    <div id="tab-liked" class="hidden">
+      <h1 class="text-2xl font-bold text-white mb-1">Lagu yang Disukai</h1>
+      <p class="text-gray-400 text-sm mb-6">Koleksi favoritmu</p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" id="likedGrid"></div>
+    </div>
+
+    <!-- FEED TAB -->
+    <div id="tab-feed" class="hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-white mb-1">Feed Saya</h1>
+          <p class="text-gray-400 text-sm">Lagu terbaru dari musisi yang kamu ikuti</p>
+        </div>
+        <button onclick="showTab('musisi', document.querySelector('[onclick*=\"showTab(\'musisi\'\"]'))" class="text-xs text-brand hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-plus"></i> Ikuti musisi baru
+        </button>
+      </div>
+      <!-- Following bar -->
+      <div id="followingBar" class="flex gap-3 overflow-x-auto pb-3 mb-6 scrollbar-none"></div>
+      <!-- Feed songs -->
+      <div id="feedGrid" class="space-y-3"></div>
+    </div>
+
+    <!-- MUSISI TAB -->
+    <div id="tab-musisi" class="hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-white mb-1">Musisi Lokal</h1>
+          <p class="text-gray-400 text-sm">Temukan dan dukung musisi Indonesia</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="filterAllBtn" onclick="filterMusisi('all',this)" class="text-xs px-3 py-1.5 rounded-lg bg-brand text-white font-semibold transition">Semua</button>
+          <button id="filterFollowingBtn" onclick="filterMusisi('following',this)" class="text-xs px-3 py-1.5 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 font-semibold transition">Diikuti</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="musisiGrid"></div>
+    </div>
+
+    <!-- PROFIL TAB -->
+    <div id="tab-profil" class="hidden">
+      <h1 class="text-2xl font-bold text-white mb-6">Profil Saya</h1>
+      <div class="card p-8 max-w-lg">
+        <div class="flex items-center gap-5 mb-8">
+          <div class="w-20 h-20 rounded-2xl bg-green-500/20 flex items-center justify-center text-5xl" id="profileAvatar">🎧</div>
+          <div>
+            <h3 class="font-bold text-white text-xl" id="profileName">—</h3>
+            <p class="text-gray-400 text-sm" id="profileEmail">—</p>
+            <p class="text-gray-500 text-xs mt-1" id="profileJoined">—</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 p-5 bg-black/20 rounded-2xl mb-6">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-brand" id="statLiked">0</div>
+            <div class="text-xs text-gray-500 mt-1">Lagu Disukai</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-white" id="statFollowing">0</div>
+            <div class="text-xs text-gray-500 mt-1">Musisi Diikuti</div>
+          </div>
+        </div>
+        <div class="border-t border-[#1a1a28] pt-6">
+          <button onclick="logout()" class="w-full flex items-center justify-center gap-3 px-4 py-3 text-sm font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 rounded-2xl transition">
+            <i class="fa-solid fa-right-from-bracket"></i> Keluar dari Akun
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM PLAYER -->
+  <div class="player px-6 py-4" id="playerBar">
+    <div class="max-w-7xl mx-auto flex items-center gap-6">
+      <!-- Song info -->
+      <div class="flex items-center gap-4 flex-1 min-w-0">
+        <div class="w-12 h-12 rounded-xl bg-brand/20 flex items-center justify-center text-2xl flex-shrink-0" id="playerCover">🎵</div>
+        <div class="min-w-0">
+          <div class="text-sm font-semibold text-white truncate" id="playerTitle">Pilih lagu untuk diputar</div>
+          <div class="text-xs text-gray-400 truncate" id="playerArtist">—</div>
+        </div>
+      </div>
+      <!-- Controls -->
+      <div class="flex items-center gap-6">
+        <button onclick="prevSong()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-backward-step text-lg"></i></button>
+        <button onclick="togglePlay()" id="playBtn" class="w-12 h-12 rounded-full bg-brand hover:bg-brand-dark flex items-center justify-center transition" style="box-shadow:0 0 20px rgba(255,94,58,0.4)">
+          <i class="fa-solid fa-play text-white" id="playIcon"></i>
+        </button>
+        <button onclick="nextSong()" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-forward-step text-lg"></i></button>
+      </div>
+      <!-- Progress -->
+      <div class="flex-1 flex items-center gap-3 max-w-sm">
+        <span class="text-xs text-gray-500" id="timeNow">0:00</span>
+        <div class="flex-1 h-1.5 bg-white/10 rounded-full cursor-pointer" onclick="seek(event,this)">
+          <div class="h-1.5 bg-brand rounded-full transition-all" id="playerProgress" style="width:0%"></div>
+        </div>
+        <span class="text-xs text-gray-500" id="timeTotal">0:00</span>
+      </div>
+      <!-- Wave + share -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-end gap-0.5 h-8" id="playerWave">
+          <div class="w-0.5 bg-brand/30 rounded" style="height:8px"></div>
+          <div class="w-0.5 bg-brand/30 rounded" style="height:12px"></div>
+          <div class="w-0.5 bg-brand/30 rounded" style="height:6px"></div>
+          <div class="w-0.5 bg-brand/30 rounded" style="height:16px"></div>
+          <div class="w-0.5 bg-brand/30 rounded" style="height:10px"></div>
+        </div>
+        <button onclick="shareCurrentSong()" id="playerShareBtn"
+          title="Bagikan lagu ini"
+          class="text-gray-500 hover:text-white transition p-1.5 rounded-lg hover:bg-white/10 disabled:opacity-30"
+          disabled>
+          <i class="fa-solid fa-share-nodes text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SHARE MODAL ═══════════════════════════════════════ -->
+  <div id="shareModal" onclick="closeShare(event)">
+    <div id="shareSheet">
+      <!-- Handle -->
+      <div class="flex justify-center pt-4 pb-2">
+        <div class="w-10 h-1 bg-white/10 rounded-full"></div>
+      </div>
+      <!-- Song preview -->
+      <div class="flex items-center gap-3 px-6 pb-4 border-b border-[#1a1a28]">
+        <div class="w-11 h-11 rounded-xl bg-brand/20 flex items-center justify-center text-2xl flex-shrink-0" id="shareCover">🎵</div>
+        <div class="min-w-0">
+          <div class="text-sm font-semibold text-white truncate" id="shareTitle">—</div>
+          <div class="text-xs text-gray-400 truncate" id="shareArtist">—</div>
+        </div>
+        <button onclick="closeShare()" class="ml-auto text-gray-600 hover:text-white transition p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <!-- Share options -->
+      <div class="grid grid-cols-4 gap-1 px-4 py-4">
+        <button class="share-btn" onclick="shareToWhatsApp()">
+          <div class="share-icon bg-green-500/15"><i class="fa-brands fa-whatsapp text-green-400"></i></div>
+          <span class="share-label">WhatsApp</span>
+        </button>
+        <button class="share-btn" onclick="shareToTwitter()">
+          <div class="share-icon bg-sky-500/15"><i class="fa-brands fa-x-twitter text-sky-400"></i></div>
+          <span class="share-label">X / Twitter</span>
+        </button>
+        <button class="share-btn" onclick="shareToTelegram()">
+          <div class="share-icon bg-blue-500/15"><i class="fa-brands fa-telegram text-blue-400"></i></div>
+          <span class="share-label">Telegram</span>
+        </button>
+        <button class="share-btn" onclick="shareToFacebook()">
+          <div class="share-icon bg-blue-600/15"><i class="fa-brands fa-facebook text-blue-500"></i></div>
+          <span class="share-label">Facebook</span>
+        </button>
+      </div>
+      <!-- Copy link -->
+      <div class="px-4 pb-2">
+        <div class="flex items-center gap-3 bg-white/5 rounded-2xl px-4 py-3">
+          <i class="fa-solid fa-link text-gray-500 text-sm flex-shrink-0"></i>
+          <span class="text-xs text-gray-400 flex-1 truncate" id="shareLinkPreview">—</span>
+          <button onclick="copyShareLink()" id="copyShareBtn"
+            class="text-xs font-semibold text-brand hover:text-white transition flex-shrink-0 px-3 py-1.5 rounded-lg hover:bg-brand/10">
+            Salin
+          </button>
+        </div>
+      </div>
+      <!-- Open page -->
+      <div class="px-4 pt-2 pb-5">
+        <button onclick="openSharePage()" class="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-medium py-3 rounded-2xl transition">
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+          Buka halaman lagu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/user-dashboard.js"></script>
+</body>
+</html>
