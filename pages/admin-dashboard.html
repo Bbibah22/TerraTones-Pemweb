@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — LokalBeat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{brand:{DEFAULT:'#ff5e3a',dark:'#e04a28'}}}}}</script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body{background:#0a0a0f;color:#f0f0f5;font-family:'DM Sans',sans-serif;}
+    h1,h2,h3,h4{font-family:'Syne',sans-serif;}
+    .sidebar{background:#0e0e16;border-right:1px solid #1a1a28;}
+    .nav-item{transition:all 0.2s;border-radius:12px;}
+    .nav-item:hover,.nav-item.active{background:#ff5e3a;color:white;}
+    .nav-item.active{box-shadow:0 4px 20px rgba(255,94,58,0.3);}
+    .card{background:#16161f;border:1px solid #222230;border-radius:20px;}
+    .badge{border-radius:8px;font-size:11px;font-weight:600;padding:3px 10px;}
+    .badge-published{background:#22c55e20;color:#4ade80;}
+    .badge-review{background:#f59e0b20;color:#fbbf24;}
+    .badge-pending{background:#6366f120;color:#a78bfa;}
+    .badge-active{background:#22c55e20;color:#4ade80;}
+    .badge-verified{background:#3b82f620;color:#60a5fa;}
+    table{width:100%;border-collapse:collapse;}
+    th{text-align:left;font-size:11px;color:#6666aa;font-weight:600;letter-spacing:.5px;padding:10px 16px;border-bottom:1px solid #1a1a28;}
+    td{padding:12px 16px;font-size:13px;border-bottom:1px solid #0f0f1a;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#1a1a22;}
+    .toast{position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;transform:translateX(120%);transition:transform 0.3s ease;}
+    .toast.show{transform:translateX(0);}
+    .toast.success{background:#22c55e;color:white;}
+    .toast.error{background:#ef4444;color:white;}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal{background:#16161f;border:1px solid #222230;border-radius:24px;padding:32px;max-width:480px;width:100%;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:#111118;}
+    ::-webkit-scrollbar-thumb{background:#ff5e3a44;border-radius:2px;}
+  </style>
+</head>
+<body class="min-h-screen flex">
+
+  <div id="toast" class="toast"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-64 min-h-screen fixed left-0 top-0 flex flex-col z-40">
+    <div class="p-6 border-b border-[#1a1a28]">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-brand flex items-center justify-center">
+          <i class="fa-solid fa-music text-white text-sm"></i>
+        </div>
+        <span style="font-family:Syne" class="font-bold text-white">Lokal<span class="text-brand">Beat</span></span>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center text-sm">🛡️</div>
+        <div>
+          <div class="text-xs font-semibold text-white" id="sidebarName">Admin</div>
+          <div class="text-xs text-gray-500">Administrator</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm font-semibold" onclick="showTab('overview',this)">
+        <i class="fa-solid fa-chart-pie w-4"></i> Overview
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('users',this)">
+        <i class="fa-solid fa-users w-4"></i> Pengguna
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('musisi',this)">
+        <i class="fa-solid fa-guitar w-4"></i> Musisi
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('gigs',this)">
+        <i class="fa-solid fa-ticket w-4"></i> Gigs
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-gray-400 font-semibold" onclick="showTab('review',this)">
+        <i class="fa-solid fa-clock-rotate-left w-4"></i> Review
+        <span class="ml-auto bg-brand text-white text-xs px-2 py-0.5 rounded-full" id="reviewBadge">0</span>
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-[#1a1a28]">
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-400 hover:text-white rounded-xl hover:bg-white/5 transition">
+        <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ml-64 flex-1 p-8">
+
+    <!-- OVERVIEW TAB -->
+    <div id="tab-overview">
+      <h1 class="text-2xl font-bold text-white mb-1">Dashboard Admin</h1>
+      <p class="text-gray-400 text-sm mb-8">Pantau dan kelola seluruh platform LokalBeat</p>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-gray-500">Total Pengguna</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center"><i class="fa-solid fa-users text-blue-400 text-xs"></i></div>
+          </div>
+          <div class="text-3xl font-bold text-white" id="statUsers">-</div>
+          <div class="text-xs text-green-400 mt-1"><i class="fa-solid fa-arrow-up"></i> Aktif semua</div>
+        </div>
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-gray-500">Total Musisi</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center"><i class="fa-solid fa-guitar text-purple-400 text-xs"></i></div>
+          </div>
+          <div class="text-3xl font-bold text-white" id="statMusisi">-</div>
+          <div class="text-xs text-yellow-400 mt-1" id="statPending">- menunggu verifikasi</div>
+        </div>
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-gray-500">Total Lagu</span>
+            <div class="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center"><i class="fa-solid fa-music text-brand text-xs"></i></div>
+          </div>
+          <div class="text-3xl font-bold text-white" id="statSongs">-</div>
+          <div class="text-xs text-yellow-400 mt-1" id="statReview">- menunggu review</div>
+        </div>
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-gray-500">Total Stream</span>
+            <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center"><i class="fa-solid fa-headphones text-green-400 text-xs"></i></div>
+          </div>
+          <div class="text-3xl font-bold text-white" id="statStreams">-</div>
+          <div class="text-xs text-green-400 mt-1">↑ Terus bertumbuh</div>
+        </div>
+      </div>
+
+      <!-- Recent songs -->
+      <div class="card p-6">
+        <h3 class="font-bold text-white mb-4">Lagu Terbaru</h3>
+        <table>
+          <thead><tr><th>Judul</th><th>Musisi</th><th>Genre</th><th>Status</th><th>Stream</th></tr></thead>
+          <tbody id="recentSongsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" class="hidden">
+      <div class="flex items-center justify-between mb-8">
+        <div><h1 class="text-2xl font-bold text-white">Manajemen Pengguna</h1><p class="text-gray-400 text-sm mt-1">Kelola semua akun pengguna</p></div>
+      </div>
+      <div class="card">
+        <div class="p-4 border-b border-[#1a1a28]">
+          <input id="searchUser" oninput="renderUsersTable()" type="text" placeholder="Cari nama atau email..." class="bg-black/30 border border-[#222230] focus:border-brand rounded-xl px-4 py-2.5 text-sm text-white w-full max-w-xs" style="outline:none"/>
+        </div>
+        <table>
+          <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Bergabung</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MUSISI TAB -->
+    <div id="tab-musisi" class="hidden">
+      <div class="flex items-center justify-between mb-8">
+        <div><h1 class="text-2xl font-bold text-white">Manajemen Musisi</h1><p class="text-gray-400 text-sm mt-1">Verifikasi dan kelola musisi — klik musisi untuk lihat lagunya</p></div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Musisi</th><th>Genre</th><th>Kota</th><th>Lagu</th><th>Followers</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="musisiTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MUSISI SONGS PANEL (modal) -->
+    <div id="musisiSongsModal" class="hidden modal-bg" onclick="closeMusisiSongs(event)">
+      <div class="modal max-w-2xl w-full" style="max-height:85vh;overflow-y:auto;" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-white" id="modalMusisiName">Lagu Musisi</h2>
+            <p class="text-gray-400 text-sm mt-0.5" id="modalMusisiMeta"></p>
+          </div>
+          <button onclick="closeMusisiSongs()" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+        <div id="modalSongsList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- GIGS TAB -->
+    <div id="tab-gigs" class="hidden">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Manajemen Gigs</h1>
+          <p class="text-gray-400 text-sm mt-1">Kelola dan tambahkan acara musik</p>
+        </div>
+        <button onclick="openAdminAddGig()"
+          class="flex items-center gap-2 text-sm font-semibold bg-brand hover:opacity-90 text-white px-4 py-2.5 rounded-xl transition">
+          <i class="fa-solid fa-plus"></i> Tambah Gig
+        </button>
+      </div>
+
+      <!-- Form tambah gig (tersembunyi default) -->
+      <div id="addGigForm" class="hidden card p-6 mb-6">
+        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-ticket text-brand"></i> Tambah Gig Baru
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2">
+            <label class="text-xs text-gray-400 mb-1.5 block">Nama Acara *</label>
+            <input id="ag-title" type="text" placeholder="contoh: Indie Night Vol. 5"
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Penampil / Band *</label>
+            <input id="ag-musisi-name" type="text" placeholder="Nama band utama"
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Genre</label>
+            <select id="ag-genre" class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+              <option value="">Pilih genre...</option>
+              <option>Indie Folk</option><option>Jazz Lokal</option><option>Pop Alternatif</option>
+              <option>R&B Lokal</option><option>Dangdut Modern</option><option>Keroncong</option>
+              <option>Hip-Hop Lokal</option><option>Elektronik</option><option>Rock</option><option>Metal</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="text-xs text-gray-400 mb-1.5 block">Venue *</label>
+            <input id="ag-venue" type="text" placeholder="contoh: Rossi Musik, Jakarta Selatan"
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Kota *</label>
+            <select id="ag-kota" class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+              <option value="">Pilih kota...</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Provinsi</label>
+            <select id="ag-provinsi" class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white outline-none transition">
+              <option value="">Pilih provinsi...</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Tanggal *</label>
+            <input id="ag-date" type="date" class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white outline-none transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Jam Mulai</label>
+            <input id="ag-time" type="time" value="19:00" class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white outline-none transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Harga Min (Rp)</label>
+            <input id="ag-price-min" type="number" placeholder="0"
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1.5 block">Harga Maks (Rp) <span class="text-gray-600">(0 = gratis)</span></label>
+            <input id="ag-price-max" type="number" placeholder="0"
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition"/>
+          </div>
+          <div class="col-span-2">
+            <label class="text-xs text-gray-400 mb-1.5 block">Deskripsi</label>
+            <textarea id="ag-desc" rows="3" placeholder="Ceritakan tentang acara ini..."
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition resize-none"></textarea>
+          </div>
+          <div class="col-span-2">
+            <label class="text-xs text-gray-400 mb-1.5 block">Link Tiket (opsional)</label>
+            <input id="ag-ticket-url" type="url" placeholder="https://tiket.com/..."
+              class="w-full bg-black/30 border border-[#1a1a28] focus:border-brand rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none transition"/>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-5">
+          <button onclick="adminAddGig()"
+            class="bg-brand hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl transition flex items-center gap-2 text-sm">
+            <i class="fa-solid fa-paper-plane"></i> Simpan Gig
+          </button>
+          <button onclick="document.getElementById('addGigForm').classList.add('hidden')"
+            class="bg-white/5 hover:bg-white/10 text-gray-400 font-semibold px-6 py-3 rounded-xl transition text-sm">
+            Batal
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Acara</th><th>Venue & Kota</th><th>Tanggal</th><th>Penampil</th><th>Harga</th><th>Going</th><th>Status</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="gigsAdminTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REVIEW TAB -->
+    <div id="tab-review" class="hidden">
+      <div class="flex items-center justify-between mb-8">
+        <div><h1 class="text-2xl font-bold text-white">Review Lagu</h1><p class="text-gray-400 text-sm mt-1">Tinjau lagu yang menunggu persetujuan</p></div>
+      </div>
+      <div id="reviewList" class="space-y-4"></div>
+    </div>
+
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/kota-indonesia.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>
