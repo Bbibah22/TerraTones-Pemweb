@@ -664,15 +664,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           kota.map(k => `<option value="${k}">${k}</option>`).join('');
       }
 
-      // Isi dropdown kota di form submit
-      const sgKota = document.getElementById('sg-kota');
-      if (sgKota && window.KOTA_PER_PROVINSI) {
-        const allKota = Object.values(window.KOTA_PER_PROVINSI).flat().sort();
-        sgKota.innerHTML = '<option value="">Pilih kota...</option>' +
-          allKota.map(k => `<option value="${k}">${k}</option>`).join('');
-      }
-      if (window.renderProvinsiSelect) renderProvinsiSelect('sg-provinsi');
-
       // Ambil going state user
       if (_gigsData.length && cu?.id) {
         // Cek satu per satu tidak efisien untuk banyak gig — gunakan local storage sementara
