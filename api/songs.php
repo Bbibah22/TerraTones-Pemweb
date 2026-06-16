@@ -59,7 +59,6 @@ switch ($method) {
         $cover       = trim($body['cover']        ?? '🎵');
         $description = trim($body['description']  ?? '');
         $fileUrl     = trim($body['fileUrl']      ?? '');  
-        $youtubeUrl  = trim($body['youtubeUrl']   ?? '');  
         $status      = 'review';
         $uploaded    = date('Y-m-d');
 
@@ -87,7 +86,7 @@ switch ($method) {
         $body = getBody();
         if (!$id) jsonResponse(['error' => 'id wajib diisi'], 400);
 
-        $allowed = ['title','genre','duration','cover','description','status','streams','likes','file_url'];
+        $allowed = ['title','genre','duration','cover','description','status','streams','file_url'];
         $sets    = [];
         $params  = [];
 
