@@ -1,11 +1,4 @@
 <?php
-// ============================================================
-// api/musisi.php — Manajemen Data Musisi
-// GET    /api/musisi.php           → semua musisi
-// GET    /api/musisi.php?id=X      → satu musisi
-// PATCH  /api/musisi.php?id=X      → update musisi
-// DELETE /api/musisi.php?id=X      → hapus musisi
-// ============================================================
 require_once __DIR__ . '/../config/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -13,7 +6,6 @@ $db     = getDB();
 
 switch ($method) {
 
-    // ── GET ─────────────────────────────────────────────────
     case 'GET':
         if (isset($_GET['id'])) {
             $stmt = $db->prepare('SELECT * FROM musisi WHERE id = ?');
@@ -24,7 +16,6 @@ switch ($method) {
         } else {
             $where  = [];
             $params = [];
-            // Full-text search: ?q=keyword — cocok ke name, genre, kota, provinsi
             if (!empty($_GET['q'])) {
                 $kw       = '%' . trim($_GET['q']) . '%';
                 $where[]  = '(name LIKE ? OR genre LIKE ? OR kota LIKE ? OR provinsi LIKE ?)';
@@ -42,7 +33,6 @@ switch ($method) {
         }
         break;
 
-    // ── PATCH ───────────────────────────────────────────────
     case 'PATCH':
         $id   = $_GET['id'] ?? '';
         $body = getBody();
@@ -56,7 +46,6 @@ switch ($method) {
         $sets    = [];
         $params  = [];
 
-        // Mapping camelCase (dari JS) → snake_case (DB)
         $keyMap  = [
             'songs'              => 'songs_count',
             'youtubeUrl'         => 'youtube_url',
@@ -79,7 +68,6 @@ switch ($method) {
         foreach ($body as $key => $val) {
             $col = $keyMap[$key] ?? $key;
             if (!in_array($col, $allowed)) continue;
-            // pk_members: encode array ke JSON
             if ($col === 'pk_members' && is_array($val)) $val = json_encode($val, JSON_UNESCAPED_UNICODE);
             $sets[]   = "$col = ?";
             $params[] = $val;
@@ -94,7 +82,6 @@ switch ($method) {
         jsonResponse(normMusisi($upd->fetch()));
         break;
 
-    // ── DELETE ──────────────────────────────────────────────
     case 'DELETE':
         $id = $_GET['id'] ?? '';
         if (!$id) jsonResponse(['error' => 'id wajib diisi'], 400);
@@ -107,7 +94,6 @@ switch ($method) {
 }
 
 function normMusisi(array $m): array {
-    // Parse members JSON jika ada
     $members = [];
     if (!empty($m['pk_members'])) {
         $members = json_decode($m['pk_members'], true) ?: [];
@@ -126,7 +112,6 @@ function normMusisi(array $m): array {
         'cover'      => $m['cover'],
         'streams'    => (int)$m['streams'],
         'youtubeUrl' => $m['youtube_url'] ?? null,
-        // Press Kit
         'pressKit' => [
             'tagline'          => $m['pk_tagline']          ?? null,
             'bioShort'         => $m['pk_bio_short']        ?? null,
