@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// api/users.php — Manajemen Pengguna (Admin)
-// GET    /api/users.php        → semua users (dengan filter ?q=keyword)
-// DELETE /api/users.php?id=X  → hapus user (admin tidak bisa dihapus)
-// ============================================================
+
 require_once __DIR__ . '/../config/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -44,7 +40,6 @@ switch ($method) {
         $id = $_GET['id'] ?? '';
         if (!$id) jsonResponse(['error' => 'id wajib diisi'], 400);
 
-        // Cek apakah user adalah admin — admin tidak boleh dihapus
         $chk = $db->prepare('SELECT role FROM users WHERE id = ?');
         $chk->execute([$id]);
         $user = $chk->fetch();

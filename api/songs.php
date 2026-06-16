@@ -1,11 +1,5 @@
 <?php
-// ============================================================
-// api/songs.php — CRUD Lagu
-// GET    /api/songs.php              → semua lagu (filter: ?status=published / ?musisi_id=X)
-// POST   /api/songs.php              → tambah lagu baru
-// PATCH  /api/songs.php?id=X        → update lagu
-// DELETE /api/songs.php?id=X        → hapus lagu
-// ============================================================
+
 require_once __DIR__ . '/../config/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -13,7 +7,7 @@ $db     = getDB();
 
 switch ($method) {
 
-    // ── GET ─────────────────────────────────────────────────
+
     case 'GET':
         $where  = [];
         $params = [];
@@ -30,7 +24,7 @@ switch ($method) {
             $where[]  = 'id = ?';
             $params[] = $_GET['id'];
         }
-        // Full-text search: ?q=keyword — cocok ke title, musisi_name, genre
+    
         if (!empty($_GET['q'])) {
             $kw       = '%' . trim($_GET['q']) . '%';
             $where[]  = '(title LIKE ? OR musisi_name LIKE ? OR genre LIKE ?)';
@@ -47,12 +41,12 @@ switch ($method) {
         $stmt->execute($params);
         $songs = $stmt->fetchAll();
 
-        // Normalise field names agar sama dengan frontend (camelCase)
+    
         $songs = array_map('normSong', $songs);
         jsonResponse($songs);
         break;
 
-    // ── POST ────────────────────────────────────────────────
+   
     case 'POST':
         $body = getBody();
 
@@ -64,8 +58,8 @@ switch ($method) {
         $duration    = trim($body['duration']     ?? '0:00');
         $cover       = trim($body['cover']        ?? '🎵');
         $description = trim($body['description']  ?? '');
-        $fileUrl     = trim($body['fileUrl']      ?? '');  // URL/path file MP3
-        $youtubeUrl  = trim($body['youtubeUrl']   ?? '');  // URL YouTube video
+        $fileUrl     = trim($body['fileUrl']      ?? '');  
+        $youtubeUrl  = trim($body['youtubeUrl']   ?? '');  
         $status      = 'review';
         $uploaded    = date('Y-m-d');
 
@@ -79,7 +73,7 @@ switch ($method) {
         );
         $stmt->execute([$id, $title, $musisiId, $musisiName, $genre, $duration, $status, $uploaded, $cover, $description, $fileUrl ?: null]);
 
-        // Update songs_count di tabel musisi
+       
         $db->prepare('UPDATE musisi SET songs_count = songs_count + 1 WHERE id = ?')->execute([$musisiId]);
 
         $new = $db->prepare('SELECT * FROM songs WHERE id = ?');
@@ -87,7 +81,7 @@ switch ($method) {
         jsonResponse(normSong($new->fetch()), 201);
         break;
 
-    // ── PATCH ───────────────────────────────────────────────
+   
     case 'PATCH':
         $id   = $_GET['id'] ?? '';
         $body = getBody();
@@ -113,12 +107,12 @@ switch ($method) {
         jsonResponse(normSong($upd->fetch()));
         break;
 
-    // ── DELETE ──────────────────────────────────────────────
+    
     case 'DELETE':
         $id = $_GET['id'] ?? '';
         if (!$id) jsonResponse(['error' => 'id wajib diisi'], 400);
 
-        // Ambil musisi_id dulu sebelum hapus
+   
         $s = $db->prepare('SELECT musisi_id FROM songs WHERE id = ?');
         $s->execute([$id]);
         $song = $s->fetch();
@@ -138,7 +132,7 @@ switch ($method) {
         jsonResponse(['error' => 'Method not allowed'], 405);
 }
 
-// ─── Helper ─────────────────────────────────────────────────
+
 function normSong(array $s): array {
     return [
         'id'          => $s['id'],
@@ -153,6 +147,6 @@ function normSong(array $s): array {
         'uploaded'    => $s['uploaded'],
         'cover'       => $s['cover'],
         'desc'        => $s['description'],
-        'fileUrl'     => $s['file_url'] ?? null,  // URL/path file MP3
+        'fileUrl'     => $s['file_url'] ?? null,  
     ];
 }
