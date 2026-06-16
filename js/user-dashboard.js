@@ -60,11 +60,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (name === 'profil') loadProfil();
   };
 
-  // ── Sub-tab Discover: dihapus — Gigs & Lagu tampil sekaligus ──
-  // switchDiscoverTab tidak lagi digunakan, tapi tetap ada agar
-  // link lama tidak error jika ada yang memanggilnya.
-  window.switchDiscoverTab = function () {};
-
   // ── UNIFIED DISCOVER SEARCH ───────────────────────────────
   let _discoverSearchTimer = null;
   window.onDiscoverSearch = function (val) {
@@ -165,26 +160,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ══════════════════════════════════════════════════════════
   // SEARCH ENGINE — Global real-time search
   // ══════════════════════════════════════════════════════════
-  let searchDebounceTimer = null;
-  let lastQuery = '';
-
-
-  // Highlight keyword dalam string
-  function highlight(text, query) {
-    if (!query) return text;
-    const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-    return String(text).replace(re, '<em>$1</em>');
-  }
-
-  // Override API.songs.all agar support ?q= dan ?genre=
-  const _origSongsAll = API.songs.all.bind(API.songs);
-  API.songs.all = function (params = {}) {
-    // simpan hasil search terakhir
-    const result = _origSongsAll(params);
-    if (params.q) result.then(s => { window._lastSearchSongs = s; });
-    return result;
-  };
-
   async function buildGenreFilters() {
     const songs  = await API.songs.all({ status: 'published' });
     const genres = [...new Set(songs.map(s => s.genre))];
@@ -894,24 +869,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderGigCards(filtered);
-  };
-
-  window.debounceGigFilter = function () {
-    clearTimeout(_gigDebounceTimer);
-    _gigDebounceTimer = setTimeout(applyGigFilters, 280);
-  };
-
-  window.setGigChip = function (chip, btn) {
-    // Toggle
-    if (_gigChipActive === chip) {
-      _gigChipActive = null;
-      document.querySelectorAll('.gig-chip').forEach(b => b.classList.remove('border-brand','text-brand','bg-brand/10'));
-    } else {
-      _gigChipActive = chip;
-      document.querySelectorAll('.gig-chip').forEach(b => b.classList.remove('border-brand','text-brand','bg-brand/10'));
-      btn.classList.add('border-brand','text-brand','bg-brand/10');
-    }
-    applyGigFilters();
   };
 
   window.resetGigFilters = function () {
