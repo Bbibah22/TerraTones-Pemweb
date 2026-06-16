@@ -53,7 +53,6 @@ switch ($method) {
                     'uploaded'   => $s['uploaded'],
                     'cover'      => $s['cover'],
                     'fileUrl'    => $s['file_url'] ?? null,
-                    'youtubeUrl' => $s['youtube_url'] ?? null,
                 ], $songs),
                 'following' => count($followedIds),
                 'isEmpty'   => false,
