@@ -48,7 +48,6 @@ switch ($method) {
 
         $keyMap  = [
             'songs'              => 'songs_count',
-            'youtubeUrl'         => 'youtube_url',
             'pkTagline'          => 'pk_tagline',
             'pkBioShort'         => 'pk_bio_short',
             'pkBioLong'          => 'pk_bio_long',
@@ -111,22 +110,5 @@ function normMusisi(array $m): array {
         'verified'   => (bool)$m['verified'],
         'cover'      => $m['cover'],
         'streams'    => (int)$m['streams'],
-        'youtubeUrl' => $m['youtube_url'] ?? null,
-        'pressKit' => [
-            'tagline'          => $m['pk_tagline']          ?? null,
-            'bioShort'         => $m['pk_bio_short']        ?? null,
-            'bioLong'          => $m['pk_bio_long']         ?? null,
-            'formedYear'       => $m['pk_formed_year']      ?? null,
-            'origin'           => $m['pk_origin']           ?? null,
-            'members'          => $members,
-            'contactBooking'   => $m['pk_contact_booking']  ?? null,
-            'contactMedia'     => $m['pk_contact_media']    ?? null,
-            'socialInstagram'  => $m['pk_social_instagram'] ?? null,
-            'socialTiktok'     => $m['pk_social_tiktok']    ?? null,
-            'socialSpotify'    => $m['pk_social_spotify']   ?? null,
-            'socialYoutube'    => $m['pk_social_youtube']   ?? null,
-            'riderNotes'       => $m['pk_rider_notes']      ?? null,
-            'isPublished'      => (bool)($m['pk_is_published'] ?? false),
-        ],
     ];
 }

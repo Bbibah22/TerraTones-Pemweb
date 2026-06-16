@@ -664,14 +664,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           kota.map(k => `<option value="${k}">${k}</option>`).join('');
       }
 
-      // Isi dropdown genre
-      const genreSel = document.getElementById('gigGenreFilter');
-      if (genreSel) {
-        const genres = data.genres || [];
-        genreSel.innerHTML = '<option value="">Semua genre</option>' +
-          genres.map(g => `<option value="${g}">${g}</option>`).join('');
-      }
-
       // Isi dropdown kota di form submit
       const sgKota = document.getElementById('sg-kota');
       if (sgKota && window.KOTA_PER_PROVINSI) {
@@ -860,32 +852,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     </div>`;
   }
 
-  // ── Helper format tanggal ─────────────────────────────────
-  function formatGigDate(dateStr) {
-    const d      = new Date(dateStr + 'T00:00:00');
-    const today  = new Date(); today.setHours(0,0,0,0);
-    const diff   = Math.round((d - today) / 86400000);
-    const days   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-
-    if (diff === 0) return 'Hari ini';
-    if (diff === 1) return 'Besok';
-    if (diff <= 7)  return `${days[d.getDay()]}, ${diff} hari lagi`;
-    return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
-  }
-
-  function isGigSoon(dateStr) {
-    const d    = new Date(dateStr + 'T00:00:00');
-    const today = new Date(); today.setHours(0,0,0,0);
-    const diff  = Math.round((d - today) / 86400000);
-    return diff >= 0 && diff <= 7;
-  }
-
-  function fmtPrice(min, max) {
-    const fmt = n => 'Rp ' + (n >= 1000 ? (n/1000).toFixed(0) + 'k' : n);
-    if (min === max || max === 0) return fmt(min);
-    return fmt(min) + '–' + fmt(max);
-  }
 
   // ── View toggle (grid/list) ───────────────────────────────
   window.setGigView = function (mode) {
@@ -902,9 +868,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const unifiedInput = document.getElementById('discoverSearch');
     const q        = (gigInput?.value || unifiedInput?.value || '').toLowerCase().trim();
     const kota     = document.getElementById('gigKotaFilter')?.value   || '';
-    const genre    = document.getElementById('gigGenreFilter')?.value  || '';
-    const dateFrom = document.getElementById('gigDateFrom')?.value     || '';
-    const dateTo   = document.getElementById('gigDateTo')?.value       || '';
 
     let filtered = _gigsData;
 
@@ -916,8 +879,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
     if (kota)  filtered = filtered.filter(g => g.kota === kota);
     if (genre) filtered = filtered.filter(g => g.genre === genre);
-    if (dateFrom) filtered = filtered.filter(g => g.date >= dateFrom);
-    if (dateTo)   filtered = filtered.filter(g => g.date <= dateTo);
 
     // Chip aktif
     if (_gigChipActive === 'free')  filtered = filtered.filter(g => g.isFree);
@@ -1154,25 +1115,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     const idx   = songs.findIndex(s => s.id === playParam);
     if (idx >= 0) { playQueue = songs; setTimeout(() => playSong(idx), 300); }
   }
-
-  // Keyboard shortcut: Ctrl+K atau "/" → fokus ke search bar discover
-  document.addEventListener('keydown', e => {
-    const search = document.getElementById('discoverSearch');
-    if (!search) return;
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      e.preventDefault();
-      search.focus();
-      search.select();
-      return;
-    }
-    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-      e.preventDefault();
-      search.focus();
-      return;
-    }
-    if (e.key === 'Escape') {
-      closeShare();
-      search.blur();
-    }
-  });
 });
