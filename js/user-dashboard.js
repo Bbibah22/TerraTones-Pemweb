@@ -613,7 +613,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let _gigsData        = [];     // semua gigs yang sedang ditampilkan
   let _gigViewMode     = 'grid'; // 'grid' | 'list'
   let _gigGoingSet     = new Set(); // gig_id yang user tandai going
-  let _gigDebounceTimer = null;
   let _gigChipActive   = null;   // 'free' | 'today' | 'week' | 'month'
 
   // ── Render utama ─────────────────────────────────────────
@@ -833,7 +832,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gigInput    = document.getElementById('gigSearchInput');
     const unifiedInput = document.getElementById('discoverSearch');
     const q        = (gigInput?.value || unifiedInput?.value || '').toLowerCase().trim();
-    const kota     = document.getElementById('gigKotaFilter')?.value   || '';
 
     let filtered = _gigsData;
 
@@ -844,30 +842,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       g.kota.toLowerCase().includes(q)
     );
     if (kota)  filtered = filtered.filter(g => g.kota === kota);
-    if (genre) filtered = filtered.filter(g => g.genre === genre);
-
-    // Chip aktif
-    if (_gigChipActive === 'free')  filtered = filtered.filter(g => g.isFree);
-    if (_gigChipActive === 'today') {
-      const today = new Date().toISOString().split('T')[0];
-      filtered = filtered.filter(g => g.date === today);
-    }
-    if (_gigChipActive === 'week') {
-      const today = new Date(); today.setHours(0,0,0,0);
-      const week  = new Date(today); week.setDate(week.getDate() + 7);
-      filtered = filtered.filter(g => {
-        const d = new Date(g.date + 'T00:00:00');
-        return d >= today && d <= week;
-      });
-    }
-    if (_gigChipActive === 'month') {
-      const now = new Date();
-      filtered = filtered.filter(g => {
-        const d = new Date(g.date + 'T00:00:00');
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
-    }
-
     renderGigCards(filtered);
   };
 
