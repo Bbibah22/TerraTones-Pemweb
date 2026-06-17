@@ -848,8 +848,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.resetGigFilters = function () {
     const ids = ['gigSearchInput','gigKotaFilter','gigGenreFilter','gigDateFrom','gigDateTo'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    _gigChipActive = null;
-    document.querySelectorAll('.gig-chip').forEach(b => b.classList.remove('border-brand','text-brand','bg-brand/10'));
     renderGigCards(_gigsData);
   };
 
