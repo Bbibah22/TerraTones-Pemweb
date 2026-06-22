@@ -9,9 +9,9 @@ Terra Tones is a website designed to bridge the gap between local musicians and 
 
 | Nama | Role | Tanggung Jawab |
 |---|---|---|
-| **Bintang Aqra Wibowo** | Musisi Fiture (Page, Logic, and Query) | 
-| **Henriko Almer Rayyan** | Admin Fiture (Page, Logic, and Query) | 
-| **Lalu Moh. Habib Adrian Maulana** | User Fiture (Page, Logic, and Query | 
+| **Bintang Aqra Wibowo** | Musisi Fiture (Page, Logic, and Query) | Backend
+| **Henriko Almer Rayyan** | Admin Fiture (Page, Logic, and Query) | Backend
+| **Lalu Moh. Habib Adrian Maulana** | User Fiture (Page, Logic, and Query | Frontend
 ---
 
 ## Actors & Features
